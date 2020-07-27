@@ -88,7 +88,7 @@ func (fr *FileReader) drain() error {
 	return nil
 }
 
-// Source iterates over FileInfoV2s generated from a fileset.ReaderAPI
+// Source iterates over FileInfoV2s generated from a fileset.Source
 type Source struct {
 	commit        *pfs.Commit
 	getReader     func() fileset.FileSource
@@ -152,7 +152,7 @@ func computeHash(cache map[string][]byte, s *stream, x string) ([]byte, error) {
 	}
 	idx := fr.Index()
 	if idx.Path != x {
-		return nil, errors.Errorf("stream is is wrong place to compute hash for %s", x)
+		return nil, errors.Errorf("stream is wrong place to compute hash for %s", x)
 	}
 	// consume x from the stream
 	fr, err = s.Next()

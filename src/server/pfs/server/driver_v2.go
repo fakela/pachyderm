@@ -208,15 +208,12 @@ func (d *driverV2) listFileV2(pachClient *client.APIClient, file *pfs.File, full
 		})
 		return x
 	})
-	if err := s.Iterate(ctx, func(fi *pfs.FileInfoV2, _ fileset.File) error {
+	return s.Iterate(ctx, func(fi *pfs.FileInfoV2, _ fileset.File) error {
 		if pathIsChild(name, fi.File.Path) {
 			return cb(fi)
 		}
 		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
 // TODO Need to figure out path cleaning.

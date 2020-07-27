@@ -59,3 +59,13 @@ func pathIsChild(parent, child string) bool {
 	rel = strings.Trim(rel, "/")
 	return !strings.Contains(rel, "/")
 }
+
+func cleanPath(x string) string {
+	if x == "" {
+		x = "/"
+	}
+	if len(x) > 1 && x[0] != '/' {
+		x = "/" + x
+	}
+	return x
+}
