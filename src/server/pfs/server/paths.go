@@ -60,6 +60,11 @@ func pathIsChild(parent, child string) bool {
 	return !strings.Contains(rel, "/")
 }
 
+// cleanPath converts paths to a canonical form used in the driver
+// "" -> "/"
+// "abc" -> "/abc"
+// "/abc" -> "/abc"
+// "/" -> "/"
 func cleanPath(x string) string {
 	if x == "" {
 		x = "/"

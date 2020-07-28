@@ -114,7 +114,7 @@ func (s *Source) Iterate(ctx context.Context, cb func(*pfs.FileInfoV2, fileset.F
 	cache := make(map[string][]byte)
 	return fs1.Iterate(ctx, func(fr fileset.File) error {
 		idx := fr.Index()
-		finfo := &pfs.FileInfoV2{
+		fi := &pfs.FileInfoV2{
 			File: client.NewFile(s.commit.Repo.Name, s.commit.ID, idx.Path),
 		}
 		if s.computeHashes {
@@ -128,9 +128,9 @@ func (s *Source) Iterate(ctx context.Context, cb func(*pfs.FileInfoV2, fileset.F
 			} else {
 				hashBytes = computeFileHash(idx)
 			}
-			finfo.Hash = pfs.EncodeHash(hashBytes)
+			fi.Hash = pfs.EncodeHash(hashBytes)
 		}
-		if err := cb(finfo, fr); err != nil {
+		if err := cb(fi, fr); err != nil {
 			return err
 		}
 		delete(cache, idx.Path)
