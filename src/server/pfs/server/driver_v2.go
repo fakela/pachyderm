@@ -465,6 +465,18 @@ func (d *driverV2) globFileV2(pachClient *client.APIClient, commit *pfs.Commit, 
 	})
 }
 
+func (d *driverV2) diffFileV2(pachClient *client.APIClient, oldFile, newFile *pfs.File, cb func(oldFi, newFi *pfs.FileInfoV2) error) error {
+	ctx := pachClient.Ctx()
+	oldCommit := oldFile.Commit
+	newCommit := newFile.Commit
+	s := NewSource(oldCommit, true, func() fileset.FileSource {
+		x := d.storage.NewSource(ctx, compactedCommitPath(oldCommit))
+		return x
+	})
+
+	return nil
+}
+
 func compactedCommitPath(commit *pfs.Commit) string {
 	return path.Join(commitKey(commit), fileset.Compacted)
 }
