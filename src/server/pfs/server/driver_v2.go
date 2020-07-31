@@ -469,12 +469,18 @@ func (d *driverV2) diffFileV2(pachClient *client.APIClient, oldFile, newFile *pf
 	ctx := pachClient.Ctx()
 	oldCommit := oldFile.Commit
 	newCommit := newFile.Commit
-	s := NewSource(oldCommit, true, func() fileset.FileSource {
+	old := NewSource(oldCommit, true, func() fileset.FileSource {
 		x := d.storage.NewSource(ctx, compactedCommitPath(oldCommit))
+		x = d.storage.NewIndexResolver(x)
 		return x
 	})
-
-	return nil
+	new := NewSource(oldCommit, true, func() fileset.FileSource) {
+		x := d.storage.NewSource(ctx, compactedCommitPath(newCommit))
+		x = d.storage.NewIndexResolver(x)
+		return x
+	})
+	diff := NewDiffer(old, new)
+	return diff.Iterate(pachClient.Ctx(), cb)
 }
 
 func compactedCommitPath(commit *pfs.Commit) string {
