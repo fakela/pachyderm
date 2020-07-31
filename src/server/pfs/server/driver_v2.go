@@ -469,18 +469,26 @@ func (d *driverV2) diffFileV2(pachClient *client.APIClient, oldFile, newFile *pf
 	ctx := pachClient.Ctx()
 	oldCommit := oldFile.Commit
 	newCommit := newFile.Commit
+	oldName := cleanPath(oldFile.Path)
+	newName := cleanPath(newFile.Path)
 	old := NewSource(oldCommit, true, func() fileset.FileSource {
-		x := d.storage.NewSource(ctx, compactedCommitPath(oldCommit))
-		x = d.storage.NewIndexResolver(x)
+		x := d.storage.NewSource(ctx, compactedCommitPath(oldCommit), index.WithPrefix(oldName))
+		x = fileset.NewIndexFilter(x, func(idx *index.Index) bool {
+			return idx.Path == oldName || strings.HasPrefix(idx.Path, oldName+"/")
+		})
+		x = fileset.NewIndexResolver(x)
 		return x
 	})
-	new := NewSource(oldCommit, true, func() fileset.FileSource) {
-		x := d.storage.NewSource(ctx, compactedCommitPath(newCommit))
-		x = d.storage.NewIndexResolver(x)
+	new := NewSource(oldCommit, true, func() fileset.FileSource {
+		x := d.storage.NewSource(ctx, compactedCommitPath(newCommit), index.WithPrefix(newName))
+		x = fileset.NewIndexFilter(x, func(idx *index.Index) bool {
+			return idx.Path == newName || strings.HasPrefix(idx.Path, newName+"/")
+		})
+		x = fileset.NewIndexResolver(x)
 		return x
 	})
 	diff := NewDiffer(old, new)
-	return diff.Iterate(pachClient.Ctx(), cb)
+	return diff.IterateDiff(pachClient.Ctx(), cb)
 }
 
 func compactedCommitPath(commit *pfs.Commit) string {

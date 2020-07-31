@@ -9,10 +9,10 @@ import (
 
 // Differ compares two sources and iterates over the items that are not equal.
 type Differ struct {
-	a, b Source
+	a, b *Source
 }
 
-func NewDiffer(a, b Source) *Differ {
+func NewDiffer(a, b *Source) *Differ {
 	return &Differ{a: a, b: b}
 }
 
@@ -89,54 +89,3 @@ func (d *Differ) IterateDiff(ctx context.Context, cb func(aFi, bFi *pfs.FileInfo
 func equalFileInfos(aFi, bFi *pfs.FileInfoV2) bool {
 	return aFi.Hash == bFi.Hash
 }
-
-// type sourceIter struct {
-// 	peek     fileset.File
-// 	fileChan chan fileset.File
-// 	errChan  chan error
-// }
-
-// func newSourceIter(ctx context.Context, source Source) *sourceIter {
-// 	fileChan := make(chan fileset.File)
-// 	errChan := make(chan error, 1)
-// 	go func() {
-// 		if err := source.Iterate(ctx, func(file fileset.File) error {
-// 			fileChan <- file
-// 			return nil
-// 		}); err != nil {
-// 			errChan <- err
-// 			return
-// 		}
-// 		close(fileChan)
-// 	}()
-// 	return &stream{
-// 		fileChan: fileChan,
-// 		errChan:  errChan,
-// 	}
-// }
-
-// func (s *stream) Peek() (fileset.File, error) {
-// 	if s.peek != nil {
-// 		return s.peek, nil
-// 	}
-// 	var err error
-// 	s.peek, err = s.Next()
-// 	return s.peek, err
-// }
-
-// func (s *stream) Next() (fileset.File, error) {
-// 	if s.peek != nil {
-// 		tmp := s.peek
-// 		s.peek = nil
-// 		return tmp, nil
-// 	}
-// 	select {
-// 	case file, more := <-s.fileChan:
-// 		if !more {
-// 			return nil, io.EOF
-// 		}
-// 		return file, nil
-// 	case err := <-s.errChan:
-// 		return nil, err
-// 	}
-// }
